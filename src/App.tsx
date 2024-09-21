@@ -1,13 +1,12 @@
-import './App.css'
-import { Input } from './components/ui'
+import { RouterProvider } from 'react-router-dom'
+import {router} from './router'
+
+
 
 function App() {
-  
-
   return (
-    <>
-      <Input  placeholder='text'/>
-    </>
+    <RouterProvider router={router}>
+    </RouterProvider>
   )
 }
 
