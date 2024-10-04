@@ -2,7 +2,7 @@ import { supabase } from ".."
 
 class SupabaseService {
 
-    static async getRows(table: string, columns: string[], eq: [string, string]) {
+    static async getRow(table: string, columns: string[], eq: [string, string]) {
         const { data, error } = await supabase
             .from(table)
             .select(columns.join(','))

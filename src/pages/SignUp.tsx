@@ -31,6 +31,13 @@ const SignUp = () => {
             return;
         }
 
+        const isNameExists = await SupabaseService.getRow('users', ['login'], ['login', login])
+
+        if(isNameExists) {
+            console.error(`CAN\'T CREATE USER: this login already exists`)
+            return
+        }
+        
         const [data, error] = await SupabaseService.insertRows('users', [{ login, password }])
 
         if (error) {

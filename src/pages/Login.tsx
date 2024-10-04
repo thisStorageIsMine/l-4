@@ -2,7 +2,6 @@ import { Link } from "react-router-dom"
 import { Input } from "../components/ui"
 import { useTitle } from "../hooks/indes"
 
-import { supabase } from "../supabase"
 import { useRef } from "react"
 
 const Login = () => {
