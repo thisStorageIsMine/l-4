@@ -26,6 +26,7 @@ const Login = () => {
         }
 
         // const {data, error}
+        console.log('Всё хорошо')
     }
 
     return (
