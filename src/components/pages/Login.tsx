@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
-import { Input } from "../components/ui"
-import { useTitle } from "../hooks/indes"
+import { Input } from "../ui"
+import { useTitle } from "../../hooks/indes"
 
 import { useRef } from "react"
 

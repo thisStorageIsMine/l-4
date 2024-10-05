@@ -6,5 +6,18 @@ const useTitle = (title: string) => {
         document.title = title
     }, [])
 }
+const useDebounce = (fn: () => void) => {
+    let timeoutId: NodeJS.Timeout | undefined;
 
-export { useTitle }
+    return (ms: number) => {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+
+        timeoutId = setTimeout(() => {
+            fn();
+        }, ms);
+    };
+};
+
+export { useTitle, useDebounce }

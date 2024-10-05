@@ -1,28 +1,34 @@
 import { supabase } from ".."
+import { Database, PostgrestError, TTables } from "../types"
 
 class SupabaseService {
 
-    static async getRow(table: string, columns: string[], eq: [string, string]) {
+    static async getRow(table: TTables, columns: string[], eq: [string, string]): Promise<[{
+        id: number;
+        login: string;
+        password: string;
+    }[] | null, null | PostgrestError]> {
         const { data, error } = await supabase
             .from(table)
             .select(columns.join(','))
             .eq(eq[0], eq[1])
+            .select()
 
         return [data, error]
     }
 
-    static async insertRows(table: string, rows: Record<string, unknown>[]) {
+    static async insertRows<T extends TTables>(table: T, rows: Array<Database['public']['Tables'][T]['Insert']>) {
         const { data, error } = await supabase
-            .from(table)
+            .from(table as keyof Database['public']['Tables'])
             .insert(rows)
             .select()
 
         return [data, error]
     }
 
-    static async updateRows(table: string, eq: [string, string], row: Record<string, unknown>) {
+    static async updateRows<T extends TTables>(table: T, eq: [string, string], row: Database['public']['Tables'][T]['Update']) {
         const { data, error } = await supabase
-            .from(table)
+            .from(table as keyof Database['public']['Tables'])
             .update(row)
             .eq(eq[0], eq[1])
             .select()
