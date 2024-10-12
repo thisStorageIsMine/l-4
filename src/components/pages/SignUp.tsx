@@ -4,9 +4,15 @@ import { useDebounce, useTitle } from "../../hooks/indes"
 import { ChangeEvent, ChangeEventHandler, Dispatch, FormEventHandler, SetStateAction, useCallback, useRef, useState } from "react"
 import { SupabaseService } from "../../supabase"
 import { useQuery } from "react-query"
+import { useNotification } from "../ui/Notifications"
+import { useErrorNotification, useSuccessNotification } from "../ui/Notifications/hooks"
 
 const SignUp = () => {
     useTitle('Создать аккаунт')
+
+    const createSuccessNotification = useSuccessNotification()
+    const createErrorNotification = useErrorNotification()
+
 
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('')
@@ -47,17 +53,22 @@ const SignUp = () => {
 
         if (data) {
             console.error(`CAN\'T CREATE USER: this login already exists`)
+            createErrorNotification('Такой логин уже существует', 'Пожалуйста, выберете другой логин')
             return
         }
 
         const [rows, error] = await SupabaseService.insertRows('users', [{ login, password }])
 
         if (error) {
-            console.error(`CAN\'T CREATE USER: ${error}`)
+            console.error(`CAN\'T CREATE USER: ${error}`);
+            createErrorNotification('Не удалось создать пользователя', 'Поробуйте ещё раз. Или обновите страницу')
             return
         }
 
-        console.log('Пользователь создан')
+        createSuccessNotification(
+            'Пользователь создан',
+            'Можете войти в аккаунт',
+        )
     }
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>, dispatch: Dispatch<SetStateAction<string>>) => {

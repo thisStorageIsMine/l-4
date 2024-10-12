@@ -1,6 +1,7 @@
 import { RouterProvider } from 'react-router-dom'
 import { router } from './router'
 import { QueryClient, QueryClientProvider, useQueryClient } from 'react-query'
+import { NotificationsProvider } from './components/ui/Notifications'
 
 const queryClient = new QueryClient()
 
@@ -9,10 +10,13 @@ function App() {
 
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router}>
-      </RouterProvider>
-    </QueryClientProvider>
+    <NotificationsProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router}>
+        </RouterProvider>
+      </QueryClientProvider>
+    </NotificationsProvider>
+
   )
 }
 
