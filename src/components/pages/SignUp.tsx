@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { Input } from "../ui"
+import { FetchButton, Input } from "../ui"
 import { useDebounce, useTitle } from "../../hooks/indes"
 import { ChangeEvent,  Dispatch, FormEventHandler, SetStateAction,  useState } from "react"
 import { SupabaseService } from "../../supabase"
@@ -107,12 +107,15 @@ const SignUp = () => {
                 <Input type="password" placeholder="Пароль" className="w-full" onChange={e => handleChange(e, setPassword)} required></Input>
                 <Input type="password" placeholder="Подтвердите пароль" className="w-full" onChange={e => handleChange(e, setConfurmPassword)} required></Input>
 
-                <button
+                {/* <button
                     className={`mt-6 w-2/3 ${isLoginFetching ? "animate-pulse brightness-50 cursor-progress" : ""}`}
                     disabled={!isButtonAvalable}
                 >
                     Создать
-                </button>
+                </button> */}
+                <FetchButton type="submit" disabled={!isButtonAvalable} isFetching={isLoginFetching}>
+                    Зарегистрироваться
+                </FetchButton>
 
                 <p className=" mt-2">
                     Уже есть аккаунт? <Link to="/login">Войдите</Link>
