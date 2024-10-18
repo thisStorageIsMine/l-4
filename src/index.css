@@ -61,6 +61,12 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+button:disabled {
+  filter: brightness(50%);
+  cursor: not-allowed;
+  border-color: #1a1a1a;
+}
+
 
 input[type='password']:focus::-ms-reveal {
   filter: invert(100%);

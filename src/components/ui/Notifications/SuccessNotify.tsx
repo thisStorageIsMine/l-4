@@ -7,7 +7,7 @@ export interface ISuccessNotifyProps {
 const SuccessNotify = ({ title, text, onClose }: ISuccessNotifyProps) => {
 
     return (
-        <div className="relative overflow-hidden rounded-lg w-[420px] grid grid-cols-1 items-center gap-1 py-4 bg-[#353434] text-black">
+        <div className="relative overflow-hidden rounded-lg w-[420px] grid grid-cols-1 items-center gap-1 py-4 bg-white text-black">
             <span className="bg-[#DDF7E0] w-12 h-full absolute top-0 left-0 grid place-items-center" >
                 <img src="success-notify.svg" alt="" role="presentation" />
             </span>

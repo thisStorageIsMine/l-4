@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom"
 import { Input } from "../ui"
 import { useDebounce, useTitle } from "../../hooks/indes"
-import { ChangeEvent, ChangeEventHandler, Dispatch, FormEventHandler, SetStateAction, useCallback, useRef, useState } from "react"
+import { ChangeEvent,  Dispatch, FormEventHandler, SetStateAction,  useState } from "react"
 import { SupabaseService } from "../../supabase"
 import { useQuery } from "react-query"
-import { useNotification } from "../ui/Notifications"
 import { useErrorNotification, useSuccessNotification } from "../ui/Notifications/hooks"
 
 const SignUp = () => {
@@ -13,28 +12,41 @@ const SignUp = () => {
     const createSuccessNotification = useSuccessNotification()
     const createErrorNotification = useErrorNotification()
 
+    const [showHelper, setShowHelper] = useState(false);
 
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('')
     const [confurmPassword, setConfurmPassword] = useState('')
 
+    
+
     const { data, isFetching: isLoginFetching, refetch: getIsLoginExists, } = useQuery({
         queryKey: ['getUser', login],
         queryFn: async () => {
-            console.log('Check')
             const [data, error] = await SupabaseService.getRow('users', ['login'], ['login', login])
             if (error || data === null) {
                 console.error(`CAN\'T CREATE USER: `)
                 throw new Error('LOGIN EXISTS')
             }
 
+            setShowHelper(true)
+            setTimeout(() => setShowHelper(false), 3500)
 
             return data.length > 0
         },
         enabled: false
     })
 
-    const getDebouncedLogin = useDebounce(getIsLoginExists)
+    const [isLoginAvalable, setIsLoginAvalable] = useState(false)
+    const isPasswordExists = password.trim() !== ''
+    const isPassEqConfurm = confurmPassword === password
+    const isButtonAvalable = isLoginAvalable && isPasswordExists && isPassEqConfurm && !isLoginFetching
+
+    const getDebouncedLogin = useDebounce(async () => {
+            const {data: isLoginExist} = await getIsLoginExists()
+            setIsLoginAvalable(!isLoginExist)
+        }
+    )
 
     const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
         e.preventDefault()
@@ -47,14 +59,6 @@ const SignUp = () => {
         if (confurmPassword !== password) {
             console.error('CAN\'T CONFURM PASSWORD: Chech password and confurm password fields')
             return;
-        }
-
-        const { data } = await getIsLoginExists()
-
-        if (data) {
-            console.error(`CAN\'T CREATE USER: this login already exists`)
-            createErrorNotification('Такой логин уже существует', 'Пожалуйста, выберете другой логин')
-            return
         }
 
         const [rows, error] = await SupabaseService.insertRows('users', [{ login, password }])
@@ -80,22 +84,24 @@ const SignUp = () => {
         getDebouncedLogin(1000)
     }
 
+    const helper = isLoginFetching
+    ?
+    <span>Проверяем свободен ли логин...</span>
+    : showHelper ?
+    <span>
+        { data ? <p className="text-red-400">Логин занят!</p> : <p className="text-emerald-400">Логин свободен</p>}
+    </span>  
+    : <></>
+
+
     return (
         <>
             <form className="flex flex-col w-full max-w-[425px] min-h-[500px] items-center p-10 gap-4" onSubmit={handleSubmit}>
                 <h1>Регистрация</h1>
-                <div className="relative">
-                    <Input type="text" placeholder="Логин" className="mt-6 w-full" onChange={e => hangleLoginChange(e, setLogin)} required></Input>
-                    <div>
-                        {isLoginFetching
-                            ?
-                            <span>Проверяем свободен ли логин...</span>
-                            :
-                            <span>
-                                {data ? <p>Логин занят!</p> : <p>Логин свободен</p>}
-                            </span>
-                        }
-
+                <div className="relative flex flex-col mt-6 w-full">
+                    <Input type="text" placeholder="Логин" className={``} onChange={e => hangleLoginChange(e, setLogin)} required></Input>
+                    <div className="text-sm self-end mt-1">
+                        {helper}
                     </div>
                 </div>
                 <Input type="password" placeholder="Пароль" className="w-full" onChange={e => handleChange(e, setPassword)} required></Input>
@@ -103,7 +109,7 @@ const SignUp = () => {
 
                 <button
                     className={`mt-6 w-2/3 ${isLoginFetching ? "animate-pulse brightness-50 cursor-progress" : ""}`}
-                    disabled={isLoginFetching}
+                    disabled={!isButtonAvalable}
                 >
                     Создать
                 </button>
