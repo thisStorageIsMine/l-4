@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom"
-import { Input } from "../ui"
+import { FetchButton, Input } from "../ui"
 import { useTitle } from "../../hooks/indes"
 
 import { ChangeEvent, Dispatch, SetStateAction,  useState } from "react"
@@ -32,6 +32,7 @@ const Login = () => {
                 <Input type="password" placeholder="Пароль" className="w-full" value={password} onChange={(e) => handleChange(e, setPassword)} required />
 
                 <button className="mt-6 w-full" disabled={!isButtonAvalable} onClick={() => handleClick()}>Войти</button>
+                <FetchButton disabled={!isButtonAvalable} isFetching={false}>Войти</FetchButton>
 
                 <p className=" mt-2">
                     У вас нету аккаунта? <Link to="/signup">Создайте его!</Link>
