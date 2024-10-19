@@ -1,12 +1,16 @@
 
-export interface IUseUserState {
-    isAuth: boolean;
-    name: TName<IUseUserState['isAuth']>
+export interface IUser {
+    name: string
+    id: number
 }
 
-export type TName<T extends boolean> = T extends true ? string : null
+export interface IUseUserState {
+    isAuth: boolean;
+    user: IUser | null
+}
+
 
 export interface IUseUserActions {
     setAuth: (auth: boolean) => void
-    setName: (name: string) => void
+    setUser: (name: string, id: number) => void
 }

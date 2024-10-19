@@ -4,9 +4,9 @@ import { IUseUserActions, IUseUserState } from "./useUser.types";
 
 const useUser = create<IUseUserActions & IUseUserState>(set => ({
     isAuth: false,
-    name: null,
+    user: null,
     setAuth: (auth) => set((state) => ({ isAuth: auth })),
-    setName: (name) => set((state) => ({name}))
+    setUser: (name, id) => set((state) => ({ user: { name, id } }))
 }))
 
-export {useUser}
+export { useUser }

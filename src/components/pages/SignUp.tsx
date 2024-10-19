@@ -85,13 +85,13 @@ const SignUp = () => {
             <form className="flex flex-col w-full max-w-[425px] min-h-[500px] items-center p-10 gap-4" onSubmit={handleSubmit}>
                 <h1>Регистрация</h1>
                 <div className="relative flex flex-col mt-6 w-full">
-                    <Input type="text" placeholder="Логин" className={``} onChange={e => hangleLoginChange(e, setLogin)} required></Input>
+                    <Input onFocus={(e) => e.currentTarget.type = 'text'} placeholder="Логин" className={``} onChange={e => hangleLoginChange(e, setLogin)} required></Input>
                     <div className="text-sm self-end mt-1">
                         {helper}
                     </div>
                 </div>
-                <Input type="password" placeholder="Пароль" className="w-full" onChange={e => handleChange(e, setPassword)} required></Input>
-                <Input type="password" placeholder="Подтвердите пароль" className="w-full" onChange={e => handleChange(e, setConfurmPassword)} required></Input>
+                <Input onFocus={(e) => e.currentTarget.type = 'password'} placeholder="Пароль" className="w-full" onChange={e => handleChange(e, setPassword)} required></Input>
+                <Input onFocus={(e) => e.currentTarget.type = 'password'} placeholder="Подтвердите пароль" className="w-full" onChange={e => handleChange(e, setConfurmPassword)} required></Input>
 
                 <FetchButton type="submit" disabled={!isButtonAvalable} isFetching={isLoginFetching}>
                     Зарегистрироваться
