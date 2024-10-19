@@ -20,8 +20,8 @@ const NotificationContainer = ({ nots, setNots }: INotificationContainerProps) =
 
                 return (
                     notify.type === 'error'
-                        ? <ErrorNotify title={title} text={text} onClose={onClose} />
-                        : <SuccessNotify title={title} text={text} onClose={onClose} />
+                        ? <ErrorNotify title={title} text={text} onClose={onClose} key={id} />
+                        : <SuccessNotify title={title} text={text} onClose={onClose} key={id} />
                 )
             })}
         </div>

@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom"
 import { FetchButton, Input } from "../ui"
-import { useTitle } from "../../hooks/indes"
+import { useTitle } from "../../hooks/utilsHooks"
 
-import { ChangeEvent, Dispatch, SetStateAction,  useState } from "react"
+import React, { ChangeEvent, Dispatch, SetStateAction, useState } from "react"
 import { useErrorNotification, useSuccessNotification } from "../ui/Notifications/hooks"
+import { SupabaseService } from '../../supabase'
 
 const Login = () => {
     useTitle('Войти в заметочную')
@@ -16,8 +17,17 @@ const Login = () => {
 
     const isButtonAvalable = login.trim().length > 0 && password.trim().length > 0
 
-    function handleClick() {
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault()
 
+        const [data, error] = await SupabaseService.getRow('users', ['login', 'password'], [['login', login], ['password', password]])
+
+        if (!data || !data[0]) {
+            showErrorNotification('Не удалось войти', 'Неправильный логин или пароль')
+            return
+        }
+
+        showSuccessNotification('Вы вошли', 'SHEEEEESH')
     }
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>, dispatch: Dispatch<SetStateAction<string>>) => {
@@ -26,18 +36,17 @@ const Login = () => {
 
     return (
         <>
-            <div className="flex flex-col w-full max-w-[350px] min-h-[500px] items-center p-10 gap-4">
+            <form className="flex flex-col w-full max-w-[375px] min-h-[500px] items-center p-10 gap-4" onSubmit={(e) => handleSubmit(e)}>
                 <h1>Вход</h1>
-                <Input type="text" placeholder="Логин" className="mt-6 w-full" value={login} onChange={(e) => handleChange(e, setLogin)}  required />
-                <Input type="password" placeholder="Пароль" className="w-full" value={password} onChange={(e) => handleChange(e, setPassword)} required />
+                <Input type="text" placeholder="Логин" className="mt-6 w-full" defaultValue={login} onChange={(e) => handleChange(e, setLogin)} required autoComplete="off" />
+                <Input type="password" placeholder="Пароль" className="w-full" defaultValue={password} onChange={(e) => handleChange(e, setPassword)} required autoComplete="off" />
 
-                <button className="mt-6 w-full" disabled={!isButtonAvalable} onClick={() => handleClick()}>Войти</button>
-                <FetchButton disabled={!isButtonAvalable} isFetching={false}>Войти</FetchButton>
+                <FetchButton disabled={!isButtonAvalable} isFetching={false} type="submit">Войти</FetchButton>
 
                 <p className=" mt-2">
                     У вас нету аккаунта? <Link to="/signup">Создайте его!</Link>
                 </p>
-            </div>
+            </form>
         </>
     )
 }

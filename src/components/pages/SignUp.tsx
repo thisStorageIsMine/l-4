@@ -1,70 +1,47 @@
 import { Link } from "react-router-dom"
 import { FetchButton, Input } from "../ui"
-import { useDebounce, useTitle } from "../../hooks/indes"
-import { ChangeEvent,  Dispatch, FormEventHandler, SetStateAction,  useState } from "react"
+import { useDebounce, useTitle } from "../../hooks/utilsHooks"
+import { ChangeEvent, Dispatch, FormEventHandler, SetStateAction, useCallback, useEffect, useRef, useState } from "react"
 import { SupabaseService } from "../../supabase"
-import { useQuery } from "react-query"
 import { useErrorNotification, useSuccessNotification } from "../ui/Notifications/hooks"
+import { useCheckLogin } from "../../hooks/"
 
 const SignUp = () => {
     useTitle('Создать аккаунт')
 
+    const [login, setLogin] = useState('');
+    const [defferedLogin, serDefferedLogin] = useState(login)
+    const [password, setPassword] = useState('')
+    const [confurmPassword, setConfurmPassword] = useState('')
+    const [showHelper, setShowHelper] = useState(false);
+    const [isButtonAvalable, setIsButtonAvalable] = useState(false)
+
     const createSuccessNotification = useSuccessNotification()
     const createErrorNotification = useErrorNotification()
 
-    const [showHelper, setShowHelper] = useState(false);
+    const showHelperTiomeoutId = useRef<NodeJS.Timeout | undefined>(undefined)
+    const onQueryStart = () => {
+        setShowHelper(defferedLogin !== '')
+    };
+    const onQuerySettled = () => {
+        clearTimeout(showHelperTiomeoutId.current)
+        showHelperTiomeoutId.current = setTimeout(() => setShowHelper(false), 5000)
+    }
 
-    const [login, setLogin] = useState('');
-    const [password, setPassword] = useState('')
-    const [confurmPassword, setConfurmPassword] = useState('')
+    const { isLoginExist, isError, isFetching: isLoginFetching } = useCheckLogin(defferedLogin, onQueryStart, onQuerySettled)
+    const setDebouncedLogin = useDebounce((login: string) => {
+        serDefferedLogin(login)
+    }, 1000)
 
-    
-
-    const { data, isFetching: isLoginFetching, refetch: getIsLoginExists, } = useQuery({
-        queryKey: ['getUser', login],
-        queryFn: async () => {
-            const [data, error] = await SupabaseService.getRow('users', ['login'], ['login', login])
-            if (error || data === null) {
-                console.error(`CAN\'T CREATE USER: `)
-                throw new Error('LOGIN EXISTS')
-            }
-
-            setShowHelper(true)
-            setTimeout(() => setShowHelper(false), 3500)
-
-            return data.length > 0
-        },
-        enabled: false
-    })
-
-    const [isLoginAvalable, setIsLoginAvalable] = useState(false)
     const isPasswordExists = password.trim() !== ''
     const isPassEqConfurm = confurmPassword === password
-    const isButtonAvalable = isLoginAvalable && isPasswordExists && isPassEqConfurm && !isLoginFetching
 
-    const getDebouncedLogin = useDebounce(async () => {
-            const {data: isLoginExist} = await getIsLoginExists()
-            setIsLoginAvalable(!isLoginExist)
-        }
-    )
-
-    const handleSubmit: FormEventHandler<HTMLFormElement> = async (e) => {
+    const handleSubmit: FormEventHandler<HTMLFormElement> = useCallback(async (e) => {
         e.preventDefault()
-
-        if (login.length === 0 || password.length === 0 || confurmPassword.length === 0) {
-            console.error('NO PASSWORD OR LOGIN: password & login must be not null')
-            return;
-        }
-
-        if (confurmPassword !== password) {
-            console.error('CAN\'T CONFURM PASSWORD: Chech password and confurm password fields')
-            return;
-        }
 
         const [rows, error] = await SupabaseService.insertRows('users', [{ login, password }])
 
         if (error) {
-            console.error(`CAN\'T CREATE USER: ${error}`);
             createErrorNotification('Не удалось создать пользователя', 'Поробуйте ещё раз. Или обновите страницу')
             return
         }
@@ -73,26 +50,35 @@ const SignUp = () => {
             'Пользователь создан',
             'Можете войти в аккаунт',
         )
-    }
+    }, [])
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>, dispatch: Dispatch<SetStateAction<string>>) => {
+    const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>, dispatch: Dispatch<SetStateAction<string>>) => {
         dispatch(e.target.value.trim())
-    }
+    }, [])
 
-    const hangleLoginChange = (e: ChangeEvent<HTMLInputElement>, dispatch: Dispatch<SetStateAction<string>>) => {
+    const hangleLoginChange = useCallback((e: ChangeEvent<HTMLInputElement>, dispatch: Dispatch<SetStateAction<string>>) => {
+        setShowHelper(false)
+        setIsButtonAvalable(false)
         dispatch(e.target.value.trim())
-        getDebouncedLogin(1000)
-    }
+        setDebouncedLogin(e.target.value.trim())
 
-    const helper = isLoginFetching
-    ?
-    <span>Проверяем свободен ли логин...</span>
-    : showHelper ?
-    <span>
-        { data ? <p className="text-red-400">Логин занят!</p> : <p className="text-emerald-400">Логин свободен</p>}
-    </span>  
-    : <></>
+        if (e.target.value.trim().length < 1) {
+            return null;
+        }
+    }, [])
 
+    const helper = showHelper
+        ? isLoginFetching ?
+            <span>Проверяем свободен ли логин...</span>
+            :
+            <span>
+                {!isLoginExist ? <p className="text-emerald-400">Логин свободен</p> : <p className="text-red-400">Логин занят!</p>}
+            </span>
+        : <></>
+
+    useEffect(() => {
+        setIsButtonAvalable(!isLoginExist && isPasswordExists && isPassEqConfurm && !isLoginFetching)
+    }, [isLoginExist, isPasswordExists, isPassEqConfurm, isLoginFetching])
 
     return (
         <>
@@ -107,12 +93,6 @@ const SignUp = () => {
                 <Input type="password" placeholder="Пароль" className="w-full" onChange={e => handleChange(e, setPassword)} required></Input>
                 <Input type="password" placeholder="Подтвердите пароль" className="w-full" onChange={e => handleChange(e, setConfurmPassword)} required></Input>
 
-                {/* <button
-                    className={`mt-6 w-2/3 ${isLoginFetching ? "animate-pulse brightness-50 cursor-progress" : ""}`}
-                    disabled={!isButtonAvalable}
-                >
-                    Создать
-                </button> */}
                 <FetchButton type="submit" disabled={!isButtonAvalable} isFetching={isLoginFetching}>
                     Зарегистрироваться
                 </FetchButton>

@@ -3,17 +3,20 @@ import { Database, PostgrestError, TTables } from "../types"
 
 class SupabaseService {
 
-    static async getRow(table: TTables, columns: string[], eq: [string, string]): Promise<[{
+    static async getRow(table: TTables, columns: string[], eq: [string, string][]): Promise<[{
         id: number;
         login: string;
         password: string;
     }[] | null, null | PostgrestError]> {
-        const { data, error } = await supabase
+        let query = supabase
             .from(table)
             .select(columns.join(','))
-            .eq(eq[0], eq[1])
-            .select()
+        
+        for(let [key, value] of eq) {
+            query = query.eq(key, value)
+        }
 
+        const {data, error} = await query.select()
         return [data, error]
     }
 
