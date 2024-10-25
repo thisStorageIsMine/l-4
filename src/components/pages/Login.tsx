@@ -13,11 +13,10 @@ const Login = () => {
     const { setUser } = useUser()
 
     const location = useLocation(),
-        origin = location.state.origin
+        origin = location.state?.origin
     const navigate = useNavigate()
 
 
-    const showSuccessNotification = useSuccessNotification()
     const showErrorNotification = useErrorNotification()
 
     const [login, setLogin] = useState('');
@@ -37,7 +36,7 @@ const Login = () => {
 
         setAuth(true)
         setUser(data[0].login, data[0].id)
-        navigate(origin)
+        navigate(origin ?? "/")
     }
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>, dispatch: Dispatch<SetStateAction<string>>) => {
