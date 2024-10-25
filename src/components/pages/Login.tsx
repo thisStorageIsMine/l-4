@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import { FetchButton, Input } from "../ui"
 import { useTitle } from "../../hooks/utilsHooks"
 
@@ -11,6 +11,10 @@ const Login = () => {
     useTitle('Войти в заметочную')
     const { setAuth } = useUser()
     const { setUser } = useUser()
+
+    const location = useLocation(),
+        origin = location.state.origin
+    const navigate = useNavigate()
 
 
     const showSuccessNotification = useSuccessNotification()
@@ -31,9 +35,9 @@ const Login = () => {
             return
         }
 
-        showSuccessNotification('Вы вошли', 'SHEEEEESH')
         setAuth(true)
         setUser(data[0].login, data[0].id)
+        navigate(origin)
     }
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>, dispatch: Dispatch<SetStateAction<string>>) => {
