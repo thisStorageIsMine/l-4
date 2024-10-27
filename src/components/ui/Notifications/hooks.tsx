@@ -1,13 +1,22 @@
-import { useNotification } from "./Context"
+import { useCallback } from "react";
+import { useNotification } from "./Context";
 
 export const useSuccessNotification = () => {
-    const createNotification = useNotification()
+  const createNotification = useNotification();
 
-    return (title: string, text: string) => createNotification({ title, text, type: 'success' })
-}
+  return useCallback(
+    (title: string, text: string) =>
+      createNotification({ title, text, type: "success" }),
+    [],
+  );
+};
 
 export const useErrorNotification = () => {
-    const createNotification = useNotification()
+  const createNotification = useNotification();
 
-    return (title: string, text: string) => createNotification({ title, text, type: 'error' })
-}
+  return useCallback(
+    (title: string, text: string) =>
+      createNotification({ title, text, type: "error" }),
+    [],
+  );
+};
