@@ -1,6 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import { Comments, Login, SignUp } from "./components/pages";
-import { Protected } from "./components";
+import { Protected, StocksAdmin } from "./components";
 
 const router = createBrowserRouter([
   {
@@ -16,6 +16,14 @@ const router = createBrowserRouter([
     element: (
       <Protected>
         <Comments />
+      </Protected>
+    ),
+  },
+  {
+    path: "/stock-admin",
+    element: (
+      <Protected>
+        <StocksAdmin />
       </Protected>
     ),
   },
